@@ -46,7 +46,17 @@ pub fn generate_samplesheet(config_path: &Utf8Path, fastq_paths: &[Utf8PathBuf],
             (None, None) => return Err(anyhow!("GEMs ID {gems_id} is associated with neither a suspension nor a multiplexed suspension"))
         };
 
-        let samplesheet = Samplesheet{sample_name: sample_name.clone(), libraries: libs.map(|(l, p)| l.id).collect(), library_types};
+        let library_ids = Vec::new();
+        let library_types = Vec::new();
+        let library_fastqs = Vec::new();
+
+        for (lib, fastq_dir) in libs {
+            library_ids.push(lib.id);
+            library_types.push(lib.type_);
+            library_fastqs.push(fastq_dir);
+        }
+
+        let samplesheet = Samplesheet{sample_name: &sample_name, libraries: library_ids, library_types, fastq_paths: library_fastqs};
     }
 
     todo!()
@@ -72,17 +82,17 @@ fn map_entity_id_to_entity<T: Id>(entities: &[T]) -> HashMap<&str, &T> {
     HashMap::from_iter(map)
 }
 
-pub struct Samplesheet {
-    libraries: Vec<String>,
-    sample_name: String,
-    library_types: Vec<String>,
-    tool: String,
-    tool_version: String,
-    command: String,
-    reference_path: Utf8PathBuf,
-    probe_set: Utf8PathBuf,
+pub struct Samplesheet<'a> {
+    libraries: Vec<&'a str>,
+    sample_name: &'a str,
+    library_types: Vec<&'a str>,
+    tool: &'a str,
+    tool_version: &'a str,
+    command: &'a str,
+    reference_path: &'a Utf8Path,
+    probe_set: &'a Utf8Path,
     design: Option<HashMap<String, SampleDesign>>,
-    fastq_paths: Vec<String>,
+    fastq_paths: Vec<&'a Utf8Path>,
 }
 
 struct SampleDesign {

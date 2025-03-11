@@ -110,7 +110,7 @@ pub struct Library {
     #[serde(rename = "GEMs ID")]
     pub gems_id: String,
     #[serde(rename = "Library Type")]
-    type_: String,
+    pub type_: String,
     #[serde(rename = "Fails QC")]
     pub fails_qc: bool
 
