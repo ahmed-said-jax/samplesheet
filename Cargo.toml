@@ -9,6 +9,7 @@ anyhow = "1.0.97"
 camino = { version = "1.1.9", features = ["serde1"] }
 clap = { version = "4.5.32", features = ["derive", "env", "wrap_help"] }
 csv = "1"
+itertools = "0.14.0"
 regex = "1"
 reqwest = "0.12.12"
 serde = { version = "1", features = ["derive"] }
