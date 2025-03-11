@@ -1,20 +1,21 @@
-use anyhow::Context;
-use camino::{Utf8Path, Utf8PathBuf};
-use clap::Parser;
-use samplesheet::generate_samplesheet;
-use serde::{Deserialize, de::DeserializeOwned};
 use std::{
     collections::HashMap,
     fs::{self},
     str::FromStr,
 };
 
+use anyhow::Context;
+use camino::{Utf8Path, Utf8PathBuf};
+use clap::Parser;
+use samplesheet::generate_samplesheet;
+use serde::{Deserialize, de::DeserializeOwned};
+
 fn main() -> anyhow::Result<()> {
     let Cli {
         config_path,
         fastq_paths,
         tracking_sheet_dir,
-        output_path
+        output_path,
     } = Cli::parse();
 
     let samplesheet = generate_samplesheet(&config_path, &fastq_paths, &tracking_sheet_dir)?;
@@ -32,6 +33,5 @@ struct Cli {
     #[arg(short, long, default_value_t = Utf8PathBuf::from_str("tracking-sheet").unwrap())]
     tracking_sheet_dir: Utf8PathBuf,
     #[arg(short, long, default_value_t = Utf8PathBuf::from_str("samplesheet.yaml").unwrap())]
-    output_path: Utf8PathBuf
+    output_path: Utf8PathBuf,
 }
-

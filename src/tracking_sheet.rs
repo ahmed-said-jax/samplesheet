@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use camino::Utf8Path;
-use serde::{de::DeserializeOwned, Deserialize};
+use serde::{Deserialize, de::DeserializeOwned};
 
 pub struct TrackingSheet {
     pub suspensions: Vec<Suspension>,
@@ -37,7 +37,7 @@ pub struct Suspension {
     #[serde(rename = "Species")]
     species: String,
     #[serde(rename = "Cellular Material")]
-    cellular_material: String
+    cellular_material: String,
 }
 impl FromTrackingSheetDir for Suspension {
     fn filename() -> &'static str {
@@ -56,7 +56,6 @@ pub struct MultiplexedSuspension {
     id: String,
     #[serde(rename = "Multiplexed Suspension (Pool) Name")]
     pub name: String,
-
 }
 impl FromTrackingSheetDir for MultiplexedSuspension {
     fn filename() -> &'static str {
@@ -75,7 +74,6 @@ pub struct Gems {
     id: String,
     #[serde(rename = "Chemistry")]
     chemistry: String,
-
 }
 impl FromTrackingSheetDir for Gems {
     fn filename() -> &'static str {
@@ -95,7 +93,7 @@ pub struct GemsSuspensions {
     #[serde(rename = "Suspension ID")]
     pub suspension_id: Option<String>,
     #[serde(rename = "Multiplexed Suspension ID")]
-    pub multiplexed_suspension_id: Option<String>
+    pub multiplexed_suspension_id: Option<String>,
 }
 impl FromTrackingSheetDir for GemsSuspensions {
     fn filename() -> &'static str {
@@ -112,8 +110,7 @@ pub struct Library {
     #[serde(rename = "Library Type")]
     pub type_: String,
     #[serde(rename = "Fails QC")]
-    pub fails_qc: bool
-
+    pub fails_qc: bool,
 }
 impl FromTrackingSheetDir for Library {
     fn filename() -> &'static str {
