@@ -1,11 +1,19 @@
-use anyhow::{anyhow, Context};
+use anyhow::Context;
 use camino::{Utf8Path, Utf8PathBuf};
 use clap::Parser;
-use serde::{de::DeserializeOwned, Deserialize};
-use std::{collections::HashMap, ffi::OsString, fs::{self, read_dir, File}, result, str::FromStr};
+use serde::{Deserialize, de::DeserializeOwned};
+use std::{
+    collections::HashMap,
+    fs::{self},
+    str::FromStr,
+};
 
 fn main() -> anyhow::Result<()> {
-    let Cli {config_path, fastq_paths, tracking_sheet_dir} = Cli::parse();
+    let Cli {
+        config_path,
+        fastq_paths,
+        tracking_sheet_dir,
+    } = Cli::parse();
 
     let config = Config::from_path(&config_path).context("failed to read configuration file")?;
 
@@ -28,7 +36,7 @@ struct Config {
     reference_paths: HashMap<String, String>,
     chemistry_tool: HashMap<String, String>,
     nf_tenx_repo: String,
-    probe_set_paths: HashMap<String, String>
+    probe_set_paths: HashMap<String, String>,
 }
 
 impl Config {
@@ -47,9 +55,7 @@ struct TrackingSheet {
 }
 
 #[derive(Deserialize)]
-struct Suspension {
-
-}
+struct Suspension {}
 impl FromTrackingSheetDir for Suspension {
     fn filename() -> &'static str {
         "Chromium(Suspensions).csv"
@@ -57,9 +63,7 @@ impl FromTrackingSheetDir for Suspension {
 }
 
 #[derive(Deserialize)]
-struct MultiplexedSuspension {
-
-}
+struct MultiplexedSuspension {}
 impl FromTrackingSheetDir for MultiplexedSuspension {
     fn filename() -> &'static str {
         "Chromium(Multiplexed Suspensions).csv"
@@ -67,9 +71,7 @@ impl FromTrackingSheetDir for MultiplexedSuspension {
 }
 
 #[derive(Deserialize)]
-struct Gems {
-
-}
+struct Gems {}
 impl FromTrackingSheetDir for Gems {
     fn filename() -> &'static str {
         "Chromium(GEMs).csv"
@@ -77,9 +79,7 @@ impl FromTrackingSheetDir for Gems {
 }
 
 #[derive(Deserialize)]
-struct GemsSuspensions {
-
-}
+struct GemsSuspensions {}
 
 impl FromTrackingSheetDir for GemsSuspensions {
     fn filename() -> &'static str {
@@ -88,9 +88,7 @@ impl FromTrackingSheetDir for GemsSuspensions {
 }
 
 #[derive(Deserialize)]
-struct Library {
-
-}
+struct Library {}
 
 impl FromTrackingSheetDir for Library {
     fn filename() -> &'static str {
@@ -98,7 +96,7 @@ impl FromTrackingSheetDir for Library {
     }
 }
 
-trait FromTrackingSheetDir: Sized + DeserializeOwned{
+trait FromTrackingSheetDir: Sized + DeserializeOwned {
     fn from_csv(path: &Utf8Path) -> anyhow::Result<Vec<Self>> {
         let mut reader = csv::Reader::from_path(path)?;
         let records: anyhow::Result<Vec<_>, _> = reader.deserialize().collect();
@@ -122,7 +120,7 @@ impl TrackingSheet {
             multiplexed_suspensions: MultiplexedSuspension::from_tracking_sheet_dir(path)?,
             gems: Gems::from_tracking_sheet_dir(path)?,
             gems_suspensions: GemsSuspensions::from_tracking_sheet_dir(path)?,
-            libraries: Library::from_tracking_sheet_dir(path)?
+            libraries: Library::from_tracking_sheet_dir(path)?,
         })
     }
 }
