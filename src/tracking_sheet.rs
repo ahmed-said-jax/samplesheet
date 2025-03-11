@@ -33,7 +33,7 @@ pub struct Suspension {
     #[serde(rename = "Suspension ID")]
     id: String,
     #[serde(rename = "Specimen Name")]
-    name: String,
+    pub name: String,
     #[serde(rename = "Species")]
     species: String,
     #[serde(rename = "Cellular Material")]
@@ -55,7 +55,7 @@ pub struct MultiplexedSuspension {
     #[serde(rename = "Multiplexed Suspension (Pool) ID")]
     id: String,
     #[serde(rename = "Multiplexed Suspension (Pool) Name")]
-    name: String,
+    pub name: String,
 
 }
 impl FromTrackingSheetDir for MultiplexedSuspension {
