@@ -18,7 +18,7 @@ fn main() -> anyhow::Result<()> {
 #[derive(Parser)]
 #[command(version, about, long_about = "")]
 struct Cli {
-    #[arg(short, long, default_value_t = Utf8PathBuf::from_str("/sc/service/.config/samplesheet.toml").unwrap())]
+    #[arg(short, long, default_value_t = Utf8PathBuf::from_str("/sc/service/etc/.config/samplesheet.toml").unwrap())]
     config_path: Utf8PathBuf,
     fastq_paths: Vec<Utf8PathBuf>,
     #[arg(short, long, default_value_t = Utf8PathBuf::from_str("tracking-sheet").unwrap())]
