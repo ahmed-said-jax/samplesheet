@@ -7,7 +7,7 @@ use std::{
 use anyhow::Context;
 use camino::{Utf8Path, Utf8PathBuf};
 use clap::Parser;
-use samplesheet::generate_samplesheet;
+use samplesheet::write_samplesheet;
 use serde::{Deserialize, de::DeserializeOwned};
 
 fn main() -> anyhow::Result<()> {
@@ -18,9 +18,7 @@ fn main() -> anyhow::Result<()> {
         output_path,
     } = Cli::parse();
 
-    let samplesheet = generate_samplesheet(&config_path, &fastq_paths, &tracking_sheet_dir)?;
-
-    Ok(())
+    write_samplesheet(&config_path, &fastq_paths, &tracking_sheet_dir, &output_path)
 }
 
 #[derive(Parser)]

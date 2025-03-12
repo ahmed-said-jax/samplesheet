@@ -31,13 +31,19 @@ pub trait Id {
 #[derive(Deserialize)]
 pub struct Suspension {
     #[serde(rename = "Suspension ID")]
-    id: String,
+    pub id: String,
     #[serde(rename = "Specimen Name")]
     pub name: String,
     #[serde(rename = "Species")]
-    species: String,
+    pub species: String,
     #[serde(rename = "Cellular Material")]
-    cellular_material: String,
+    pub cellular_material: String,
+    #[serde(rename = "Tissue")]
+    pub tissue: String,
+    #[serde(rename = "Multiplexing Tag ID")]
+    pub tag_id: Option<String>,
+    #[serde(rename = "Pooled Into ID")]
+    pub pooled_into_id: Option<String>,
 }
 impl FromTrackingSheetDir for Suspension {
     fn filename() -> &'static str {
@@ -73,7 +79,7 @@ pub struct Gems {
     #[serde(rename = "GEMs ID")]
     id: String,
     #[serde(rename = "Chemistry")]
-    chemistry: String,
+    pub chemistry: String,
 }
 impl FromTrackingSheetDir for Gems {
     fn filename() -> &'static str {
@@ -104,7 +110,7 @@ impl FromTrackingSheetDir for GemsSuspensions {
 #[derive(Deserialize)]
 pub struct Library {
     #[serde(rename = "Library ID")]
-    pub id: String,
+    id: String,
     #[serde(rename = "GEMs ID")]
     pub gems_id: String,
     #[serde(rename = "Library Type")]
