@@ -1,14 +1,8 @@
-use std::{
-    collections::HashMap,
-    fs::{self},
-    str::FromStr,
-};
+use std::str::FromStr;
 
-use anyhow::Context;
-use camino::{Utf8Path, Utf8PathBuf};
+use camino::Utf8PathBuf;
 use clap::Parser;
 use samplesheet::write_samplesheet;
-use serde::{Deserialize, de::DeserializeOwned};
 
 fn main() -> anyhow::Result<()> {
     let Cli {

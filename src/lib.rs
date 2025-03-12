@@ -1,17 +1,10 @@
-use std::{
-    collections::HashMap,
-    fs,
-    hash::{Hash, RandomState},
-    ops::Mul,
-};
+use std::{collections::HashMap, fs};
 
 use anyhow::{Context, anyhow};
 use camino::{Utf8Path, Utf8PathBuf};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
-use tracking_sheet::{
-    FromTrackingSheetDir, Gems, GemsSuspensions, Id, Library, MultiplexedSuspension, Suspension, TrackingSheet,
-};
+use tracking_sheet::{FromTrackingSheetDir, Gems, GemsSuspensions, Id, Library, MultiplexedSuspension, Suspension};
 mod tracking_sheet;
 
 pub fn write_samplesheet(
@@ -148,7 +141,7 @@ fn map_entity_id_to_entity<T: Id>(entities: &[T]) -> HashMap<&str, &T> {
 enum Sample<'a> {
     Singleplexed(&'a Suspension),
     Multiplexed(&'a MultiplexedSuspension, &'a [&'a Suspension]),
-    Ocm(Vec<&'a Suspension>)
+    Ocm(Vec<&'a Suspension>),
 }
 
 impl<'a> Sample<'a> {
@@ -166,9 +159,22 @@ impl<'a> Sample<'a> {
         match (suspension_id, multiplexed_suspension_id) {
             (Some(ids), None) => {
                 let sample = if ids.len() == 1 {
-                    Sample::Singleplexed(suspensions.get(ids[0]).ok_or(anyhow!("suspension ID {} not found", ids[0]))?)
+                    Sample::Singleplexed(
+                        suspensions
+                            .get(ids[0])
+                            .ok_or(anyhow!("suspension ID {} not found", ids[0]))?,
+                    )
                 } else {
-                    Sample::Ocm(ids.iter().map(|id| suspensions.get(id).map(|s| *s).ok_or(anyhow!("suspension ID {id} not found"))).try_collect()?)
+                    Sample::Ocm(
+                        ids.iter()
+                            .map(|id| {
+                                suspensions
+                                    .get(id)
+                                    .map(|s| *s)
+                                    .ok_or(anyhow!("suspension ID {id} not found"))
+                            })
+                            .try_collect()?,
+                    )
                 };
 
                 Ok(sample)
@@ -194,15 +200,17 @@ impl<'a> Sample<'a> {
         match self {
             Self::Singleplexed(Suspension { name, .. }) => name,
             Self::Multiplexed(MultiplexedSuspension { name, .. }, _) => name,
-            Self::Ocm(_) => "OCM-pool"
+            Self::Ocm(_) => "OCM-pool",
         }
     }
 
     fn design(&self) -> Option<anyhow::Result<HashMap<&'a str, SampleDesign<'a>>>> {
         let suspensions = match self {
-            Self::Singleplexed(_) => {return None;}
+            Self::Singleplexed(_) => {
+                return None;
+            }
             Self::Multiplexed(_, suspensions) => *suspensions,
-            Self::Ocm(suspensions) => suspensions.as_slice()
+            Self::Ocm(suspensions) => suspensions.as_slice(),
         };
 
         let mut design = HashMap::with_capacity(suspensions.len());
@@ -234,7 +242,7 @@ impl<'a> Sample<'a> {
         match self {
             Self::Singleplexed(Suspension { species, .. }) => species,
             Self::Multiplexed(_, suspensions) => &suspensions[0].species,
-            Self::Ocm(suspensions) => &suspensions[0].species
+            Self::Ocm(suspensions) => &suspensions[0].species,
         }
     }
 
@@ -242,7 +250,7 @@ impl<'a> Sample<'a> {
         let cellular_material = match self {
             Self::Singleplexed(Suspension { cellular_material, .. }) => cellular_material.as_str(),
             Self::Multiplexed(_, suspensions) => &suspensions[0].cellular_material,
-            Self::Ocm(suspensions) => &suspensions[0].cellular_material
+            Self::Ocm(suspensions) => &suspensions[0].cellular_material,
         };
 
         let is_nuclei = match cellular_material {
