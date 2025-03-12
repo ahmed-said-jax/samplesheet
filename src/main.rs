@@ -20,7 +20,6 @@ fn main() -> anyhow::Result<()> {
 struct Cli {
     #[arg(short, long, default_value_t = Utf8PathBuf::from_str("/sc/service/.config/samplesheet.toml").unwrap())]
     config_path: Utf8PathBuf,
-    #[arg(short, long)]
     fastq_paths: Vec<Utf8PathBuf>,
     #[arg(short, long, default_value_t = Utf8PathBuf::from_str("tracking-sheet").unwrap())]
     tracking_sheet_dir: Utf8PathBuf,

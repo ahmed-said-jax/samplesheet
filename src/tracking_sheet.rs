@@ -1,24 +1,25 @@
-use camino::Utf8Path;
-use serde::{Deserialize, de::DeserializeOwned};
+use std::fs;
 
-pub struct TrackingSheet {
-    pub suspensions: Vec<Suspension>,
-    pub multiplexed_suspensions: Vec<MultiplexedSuspension>,
-    pub gems: Vec<Gems>,
-    pub gems_suspensions: Vec<GemsSuspensions>,
-    pub libraries: Vec<Library>,
-}
+use anyhow::Context;
+use camino::Utf8Path;
+use itertools::Itertools;
+use serde::{Deserialize, de::DeserializeOwned};
 
 pub trait FromTrackingSheetDir: Sized + DeserializeOwned {
     fn filename() -> &'static str;
 
     fn from_tracking_sheet_dir(dir: &Utf8Path) -> anyhow::Result<Vec<Self>> {
         let path = dir.join(Self::filename());
+        let contents = fs::read_to_string(&path).context(format!("failed to read {path}"))?.split('\n').skip(Self::header_row()).join("\n");
 
-        let mut reader = csv::Reader::from_path(path)?;
+        let mut reader = csv::Reader::from_reader(contents.as_bytes());
         let records: anyhow::Result<Vec<_>, _> = reader.deserialize().collect();
 
         Ok(records?)
+    }
+
+    fn header_row() -> usize {
+        0
     }
 }
 
@@ -45,7 +46,11 @@ pub struct Suspension {
 }
 impl FromTrackingSheetDir for Suspension {
     fn filename() -> &'static str {
-        "Chromium(Suspensions).csv"
+        "Suspensions.csv"
+    }
+
+    fn header_row() -> usize {
+        1
     }
 }
 impl Id for Suspension {
@@ -63,7 +68,11 @@ pub struct MultiplexedSuspension {
 }
 impl FromTrackingSheetDir for MultiplexedSuspension {
     fn filename() -> &'static str {
-        "Chromium(Multiplexed Suspensions).csv"
+        "Multiplexed Suspensions.csv"
+    }
+
+    fn header_row() -> usize {
+        1
     }
 }
 impl Id for MultiplexedSuspension {
@@ -81,7 +90,7 @@ pub struct Gems {
 }
 impl FromTrackingSheetDir for Gems {
     fn filename() -> &'static str {
-        "Chromium(GEMs).csv"
+        "GEMs.csv"
     }
 }
 impl Id for Gems {
@@ -101,24 +110,22 @@ pub struct GemsSuspensions {
 }
 impl FromTrackingSheetDir for GemsSuspensions {
     fn filename() -> &'static str {
-        "Chromium(GEMs-Suspensions).csv"
+        "GEMs-Suspensions.csv"
     }
 }
 
 #[derive(Deserialize)]
 pub struct Library {
     #[serde(rename = "Library ID")]
-    id: String,
+    pub id: String,
     #[serde(rename = "GEMs ID")]
     pub gems_id: String,
     #[serde(rename = "Library Type")]
     pub type_: String,
-    #[serde(rename = "Fails QC")]
-    pub fails_qc: bool,
 }
 impl FromTrackingSheetDir for Library {
     fn filename() -> &'static str {
-        "Chromium(Libraries).csv"
+        "Libraries.csv"
     }
 }
 impl Id for Library {

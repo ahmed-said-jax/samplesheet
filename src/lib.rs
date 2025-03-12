@@ -61,10 +61,16 @@ pub fn write_samplesheet(
         let mut library_types = Vec::new();
         let mut library_fastqs = Vec::new();
 
-        for (lib, fastq_dir) in libs {
-            library_ids.push(lib.id());
-            library_types.push(lib.type_.as_str());
+        for (Library{id, type_, ..}, fastq_dir) in libs {
+            library_ids.push(id.as_str());
             library_fastqs.push(*fastq_dir);
+
+            let type_ = match type_.as_str() {
+                "Gene Expression Flex" => "Gene Expression",
+                _ => type_
+            };
+
+            library_types.push(type_);
         }
 
         let library_gems = gems.get(gems_id).ok_or(anyhow!("GEMs ID {gems_id} not found"))?;
@@ -96,10 +102,13 @@ pub fn write_samplesheet(
             "species {species} not found in config's 'species_reference_probe_set'"
         ))?;
 
+        let is_nuclei = sample.is_nuclei()?;
+
         let samplesheet = Samplesheet {
             sample_name: sample.name(),
             libraries: library_ids,
             library_types,
+            is_nuclei,
             fastq_paths: library_fastqs,
             design,
             tool,
@@ -123,7 +132,7 @@ fn library_id_to_fastq_dir(fastq_paths: &[Utf8PathBuf]) -> anyhow::Result<HashMa
     for p in fastq_paths {
         let err = format!("malformed FASTQ path: {p}");
 
-        let filename = p.file_name().ok_or_else(|| anyhow!(err.clone()))?;
+        let filename = p.file_name().ok_or_else(|| anyhow!(err.clone()))?.split('_').next().unwrap_or_default();
         let dir = p.parent().ok_or_else(|| anyhow!(err))?;
 
         library_ids_to_fastqs.insert(filename, dir);
@@ -268,6 +277,7 @@ pub struct Samplesheet<'a> {
     libraries: Vec<&'a str>,
     sample_name: &'a str,
     library_types: Vec<&'a str>,
+    is_nuclei: bool,
     tool: &'a str,
     tool_version: &'a str,
     command: &'a str,
