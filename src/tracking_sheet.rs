@@ -10,7 +10,11 @@ pub trait FromTrackingSheetDir: Sized + DeserializeOwned {
 
     fn from_tracking_sheet_dir(dir: &Utf8Path) -> anyhow::Result<Vec<Self>> {
         let path = dir.join(Self::filename());
-        let contents = fs::read_to_string(&path).context(format!("failed to read {path}"))?.split('\n').skip(Self::header_row()).join("\n");
+        let contents = fs::read_to_string(&path)
+            .context(format!("failed to read {path}"))?
+            .split('\n')
+            .skip(Self::header_row())
+            .join("\n");
 
         let mut reader = csv::Reader::from_reader(contents.as_bytes());
         let records: anyhow::Result<Vec<_>, _> = reader.deserialize().collect();

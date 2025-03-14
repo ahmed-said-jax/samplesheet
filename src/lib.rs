@@ -61,13 +61,13 @@ pub fn write_samplesheet(
         let mut library_types = Vec::new();
         let mut library_fastqs = Vec::new();
 
-        for (Library{id, type_, ..}, fastq_dir) in libs {
+        for (Library { id, type_, .. }, fastq_dir) in libs {
             library_ids.push(id.as_str());
             library_fastqs.push(*fastq_dir);
 
             let type_ = match type_.as_str() {
                 "Gene Expression Flex" => "Gene Expression",
-                _ => type_
+                _ => type_,
             };
 
             library_types.push(type_);
@@ -95,9 +95,15 @@ pub fn write_samplesheet(
         };
 
         let species = sample.species();
-        let reference_path = config.species_reference_path.get(species).ok_or(anyhow!(
+
+        let reference_paths = config.species_reference_path.get(species).ok_or(anyhow!(
             "species {species} not found in config's 'species_reference_path'"
         ))?;
+        let reference_path = reference_paths.get(&format!("{tool} {command}")).ok_or(anyhow!(
+            "chemistry {} not found in reference paths for {species}",
+            library_gems.chemistry
+        ))?;
+
         let probe_set = config.species_probe_set.get(species).ok_or(anyhow!(
             "species {species} not found in config's 'species_reference_probe_set'"
         ))?;
@@ -132,7 +138,12 @@ fn library_id_to_fastq_dir(fastq_paths: &[Utf8PathBuf]) -> anyhow::Result<HashMa
     for p in fastq_paths {
         let err = format!("malformed FASTQ path: {p}");
 
-        let filename = p.file_name().ok_or_else(|| anyhow!(err.clone()))?.split('_').next().unwrap_or_default();
+        let filename = p
+            .file_name()
+            .ok_or_else(|| anyhow!(err.clone()))?
+            .split('_')
+            .next()
+            .unwrap_or_default();
         let dir = p.parent().ok_or_else(|| anyhow!(err))?;
 
         library_ids_to_fastqs.insert(filename, dir);
@@ -295,7 +306,7 @@ struct SampleDesign<'a> {
 
 #[derive(Deserialize)]
 struct Config {
-    species_reference_path: HashMap<String, Utf8PathBuf>,
+    species_reference_path: HashMap<String, HashMap<String, Utf8PathBuf>>,
     chemistry_program: HashMap<String, (String, String, String)>,
     species_probe_set: HashMap<String, Utf8PathBuf>,
 }
