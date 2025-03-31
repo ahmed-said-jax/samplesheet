@@ -61,16 +61,19 @@ pub fn write_samplesheet(
         let mut library_types = Vec::new();
         let mut library_fastqs = Vec::new();
 
+        let mut original_types = Vec::new();
+
         for (Library { id, type_, .. }, fastq_dir) in libs {
             library_ids.push(id.as_str());
             library_fastqs.push(*fastq_dir);
 
-            let type_ = match type_.as_str() {
+            let mapped_type_ = match type_.as_str() {
                 "Gene Expression Flex" => "Gene Expression",
                 _ => type_,
             };
 
-            library_types.push(type_);
+            library_types.push(mapped_type_);
+            original_types.push(type_.as_str());
         }
 
         let library_gems = gems.get(gems_id).ok_or(anyhow!("GEMs ID {gems_id} not found"))?;
@@ -88,11 +91,7 @@ pub fn write_samplesheet(
             &multiplexed_suspensions,
         )?;
 
-        let design = sample.design();
-        let design = match design {
-            None => None,
-            Some(d) => Some(d?.clone()),
-        };
+        let design = sample.design().context("failed to create 'design' field")?;
 
         let species = sample.species();
 
@@ -104,9 +103,13 @@ pub fn write_samplesheet(
             library_gems.chemistry
         ))?;
 
-        let probe_set = config.species_probe_set.get(species).ok_or(anyhow!(
-            "species {species} not found in config's 'species_reference_probe_set'"
-        ))?;
+        let probe_set = if original_types.contains(&"Gene Expression Flex") {
+            Some(config.species_probe_set.get(species).ok_or(anyhow!(
+                "species {species} not found in config's 'species_reference_probe_set'"
+            ))?)
+        } else {
+            None
+        };
 
         let is_nuclei = sample.is_nuclei()?;
 
@@ -224,10 +227,10 @@ impl<'a> Sample<'a> {
         }
     }
 
-    fn design(&self) -> Option<anyhow::Result<HashMap<&'a str, SampleDesign<'a>>>> {
+    fn design(&self) -> anyhow::Result<Option<HashMap<&'a str, SampleDesign<'a>>>> {
         let suspensions = match self {
             Self::Singleplexed(_) => {
-                return None;
+                return Ok(None);
             }
             Self::Multiplexed(_, suspensions) => *suspensions,
             Self::Ocm(suspensions) => suspensions.as_slice(),
@@ -243,7 +246,7 @@ impl<'a> Sample<'a> {
         } in suspensions
         {
             let Some(tag_id) = tag_id else {
-                return Some(Err(anyhow!("no tag ID for suspension {id}")));
+                return Err(anyhow!("no tag ID for suspension {id}"));
             };
 
             design.insert(
@@ -255,7 +258,7 @@ impl<'a> Sample<'a> {
             );
         }
 
-        Some(Ok(design))
+        Ok(Some(design))
     }
 
     fn species(&self) -> &'a str {
@@ -293,7 +296,7 @@ pub struct Samplesheet<'a> {
     tool_version: &'a str,
     command: &'a str,
     reference_path: &'a Utf8Path,
-    probe_set: &'a Utf8Path,
+    probe_set: Option<&'a Utf8PathBuf>,
     design: Option<HashMap<&'a str, SampleDesign<'a>>>,
     fastq_paths: Vec<&'a Utf8Path>,
 }
