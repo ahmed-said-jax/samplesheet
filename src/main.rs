@@ -1,28 +1,54 @@
-use std::str::FromStr;
-
+use anyhow::Context;
 use camino::Utf8PathBuf;
 use clap::Parser;
-use samplesheet::write_samplesheet;
+use clap::Subcommand;
+use scbl_utils::AppConfig;
+use scbl_utils::stage_xenium_data;
+use std::str::FromStr;
 
-fn main() -> anyhow::Result<()> {
+#[tokio::main(flavor = "current_thread")]
+async fn main() -> anyhow::Result<()> {
+    dotenvy::dotenv().ok();
     let Cli {
         config_path,
-        fastq_paths,
-        tracking_sheet_dir,
-        output_path,
+        cache_dir,
+        command,
     } = Cli::parse();
 
-    write_samplesheet(&config_path, &fastq_paths, &tracking_sheet_dir, &output_path)
+    let AppConfig { samplesheet, xenium } =
+        AppConfig::read_toml_file(&config_path).context("failed to read scbl-utils configuration")?;
+
+    match command {
+        Command::Samplesheet {
+            fastq_paths,
+            output_path,
+        } => todo!(),
+        Command::StageXenium { data_dirs } => stage_xenium_data(&data_dirs, &xenium)
+            .await
+            .context("failed to stage xenium data directories")?,
+    }
+
+    Ok(())
+}
+
+#[derive(Subcommand)]
+enum Command {
+    Samplesheet {
+        fastq_paths: Vec<Utf8PathBuf>,
+        #[arg(short, long, default_value_t = Utf8PathBuf::from_str("samplesheet.yaml").unwrap())]
+        output_path: Utf8PathBuf,
+    },
+    StageXenium {
+        data_dirs: Vec<Utf8PathBuf>,
+    },
 }
 
 #[derive(Parser)]
-#[command(version, about, long_about = "")]
 struct Cli {
-    #[arg(short, long, default_value_t = Utf8PathBuf::from_str("/sc/service/etc/.config/samplesheet.toml").unwrap())]
+    #[arg(long, env, default_value_t = Utf8PathBuf::from_str("/sc/service/.config/scbl-utils/config.toml").unwrap())]
     config_path: Utf8PathBuf,
-    fastq_paths: Vec<Utf8PathBuf>,
-    #[arg(short, long, default_value_t = Utf8PathBuf::from_str("tracking-sheet").unwrap())]
-    tracking_sheet_dir: Utf8PathBuf,
-    #[arg(short, long, default_value_t = Utf8PathBuf::from_str("samplesheet.yaml").unwrap())]
-    output_path: Utf8PathBuf,
+    #[arg(long, env, default_value_t = Utf8PathBuf::from_str("/sc/service/.cache/scbl-utils/").unwrap())]
+    cache_dir: Utf8PathBuf,
+    #[command(subcommand)]
+    command: Command,
 }

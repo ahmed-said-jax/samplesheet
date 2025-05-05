@@ -1,0 +1,7 @@
+[samplesheet]
+
+[xenium]
+google_sheets_api_key = ""
+
+[xenium.spreadsheet]
+id = ""
