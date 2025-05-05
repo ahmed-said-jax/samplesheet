@@ -39,7 +39,7 @@ struct Spreadsheet {
 struct ValueRange {
     range: String,
     major_dimension: MajorDimension,
-    values: Vec<Vec<String>>,
+    values: Vec<[String; 1]>,
 }
 
 #[derive(Deserialize, Debug)]
