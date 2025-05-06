@@ -7,7 +7,7 @@ use reqwest::Client;
 use std::str::FromStr;
 
 use camino::Utf8PathBuf;
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize};
 
 const N_SPREADSHEET_RANGES: usize = 4;
 
@@ -25,16 +25,6 @@ pub async fn stage_data(data_dirs: &[Utf8PathBuf], config: &config::Config) -> a
         .await
         .context("failed to download Xenium spreadsheet")?;
 
-    println!(
-        "n_rows0: {}\nn_rows1: {}\nn_rows2: {}\nn_rows3: {}\n",
-        data.value_ranges[0].values.len(),
-        data.value_ranges[1].values.len(),
-        data.value_ranges[2].values.len(),
-        data.value_ranges[3].values.len()
-    );
-
-    println!("{data:?}");
-
     Ok(())
 }
 
@@ -49,14 +39,33 @@ struct Spreadsheet {
 struct ValueRange {
     range: String,
     major_dimension: MajorDimension,
-    values: Vec<Row>,
+    #[serde(deserialize_with = "deserialize_rows")]
+    values: Vec<[String; 1]>,
 }
 
-#[derive(Deserialize, Debug)]
-#[serde(untagged)]
-enum Row {
-    Full([String; 1]),
-    Empty([String; 0]),
+type Rows = Vec<[String; 1]>;
+
+fn deserialize_rows<'de, D>(deserializer: D) -> Result<Rows, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    #[derive(Deserialize)]
+    #[serde(untagged)]
+    enum MaybeEmptyRow {
+        Full([String; 1]),
+        Empty([String; 0]),
+    }
+
+    let deserialized = Vec::<MaybeEmptyRow>::deserialize(deserializer)?;
+
+    let extract_inner = |row: MaybeEmptyRow| match row {
+        MaybeEmptyRow::Empty(_) => [String::new()],
+        MaybeEmptyRow::Full(data) => data,
+    };
+
+    let extracted = deserialized.into_iter().map(extract_inner).collect();
+
+    Ok(extracted)
 }
 
 #[derive(Deserialize, Debug)]
