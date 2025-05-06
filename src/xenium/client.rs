@@ -34,6 +34,8 @@ impl GoogleSheetsClient {
     {
         let Self(client) = self;
 
+        spreadsheet.validate_n_rows()?;
+
         let base = "https://sheets.googleapis.com/v4/spreadsheets";
         let endpoint = "values:batchGet";
 

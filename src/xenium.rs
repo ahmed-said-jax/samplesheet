@@ -25,6 +25,16 @@ pub async fn stage_data(data_dirs: &[Utf8PathBuf], config: &config::Config) -> a
         .await
         .context("failed to download Xenium spreadsheet")?;
 
+    println!(
+        "n_rows0: {}\nn_rows1: {}\nn_rows2: {}\nn_rows3: {}\n",
+        data.value_ranges[0].values.len(),
+        data.value_ranges[1].values.len(),
+        data.value_ranges[2].values.len(),
+        data.value_ranges[3].values.len()
+    );
+
+    println!("{data:?}");
+
     Ok(())
 }
 
@@ -39,7 +49,7 @@ struct Spreadsheet {
 struct ValueRange {
     range: String,
     major_dimension: MajorDimension,
-    values: Vec<[String; 1]>,
+    values: Vec<Vec<String>>,
 }
 
 #[derive(Deserialize, Debug)]
