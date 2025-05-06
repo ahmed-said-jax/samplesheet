@@ -49,7 +49,14 @@ struct Spreadsheet {
 struct ValueRange {
     range: String,
     major_dimension: MajorDimension,
-    values: Vec<Vec<String>>,
+    values: Vec<Row>,
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(untagged)]
+enum Row {
+    Full([String; 1]),
+    Empty([String; 0]),
 }
 
 #[derive(Deserialize, Debug)]
