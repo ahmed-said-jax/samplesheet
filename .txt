@@ -1,0 +1,2 @@
+initially created as (stuff)__RUN_ID/(stuff)__SLIDE_NAME__(stuff)
+DELIVER AS SLIDE_ID-RUN_ID_SLIDE_NAME

@@ -3,5 +3,5 @@
 [xenium]
 google_sheets_api_key = ""
 
-[xenium.spreadsheet]
+[xenium.spreadsheet_spec]
 id = ""

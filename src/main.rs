@@ -1,10 +1,9 @@
+use std::str::FromStr;
+
 use anyhow::Context;
 use camino::Utf8PathBuf;
-use clap::Parser;
-use clap::Subcommand;
-use scbl_utils::AppConfig;
-use scbl_utils::stage_xenium_data;
-use std::str::FromStr;
+use clap::{Parser, Subcommand};
+use scbl_utils::{AppConfig, stage_xenium_data};
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> anyhow::Result<()> {

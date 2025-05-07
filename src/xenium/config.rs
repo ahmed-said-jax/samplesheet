@@ -12,13 +12,13 @@ use super::N_SPREADSHEET_RANGES;
 #[derive(Deserialize)]
 pub struct Config {
     pub(super) google_sheets_api_key: String,
-    pub(super) spreadsheet: Spreadsheet,
+    pub(super) spreadsheet_spec: SpreadsheetSpecification,
     #[serde(default = "default_staging_dir")]
     pub(super) staging_dir: Utf8PathBuf,
 }
 
 #[derive(Deserialize)]
-pub(super) struct Spreadsheet {
+pub(super) struct SpreadsheetSpecification {
     pub id: String,
     sheet_name: String,
     lab_name_range: SpreadsheetColumnRange,
@@ -26,7 +26,7 @@ pub(super) struct Spreadsheet {
     slide_id_range: SpreadsheetColumnRange,
     slide_name_range: SpreadsheetColumnRange,
 }
-impl Spreadsheet {
+impl SpreadsheetSpecification {
     pub fn validate_n_rows(&self) -> anyhow::Result<()> {
         let Self {
             lab_name_range: SpreadsheetColumnRange((_, lab_row1), (_, lab_row2)),
@@ -67,6 +67,7 @@ impl Spreadsheet {
 pub struct SpreadsheetColumnRange((String, String), (String, String));
 impl FromStr for SpreadsheetColumnRange {
     type Err = anyhow::Error;
+
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let cell_regex = r#"([A-Z]+)([1-9][0-9]?)"#;
         let range_regex = Regex::new(&format!(r#"^{cell_regex}:{cell_regex}$"#)).unwrap();
@@ -118,7 +119,7 @@ mod tests {
     use serde::Deserialize;
     use toml::toml;
 
-    use super::{Spreadsheet, SpreadsheetColumnRange};
+    use super::{SpreadsheetColumnRange, SpreadsheetSpecification};
 
     #[test]
     fn spreadsheet_range_to_and_from_str() {
