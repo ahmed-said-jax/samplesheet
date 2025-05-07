@@ -1,10 +1,9 @@
 use std::{fmt::Display, str::FromStr};
 
-use anyhow::{anyhow, bail, ensure};
+use anyhow::{anyhow, ensure};
 use camino::Utf8PathBuf;
 use itertools::Itertools;
 use regex::Regex;
-use reqwest::{Method, Request, RequestBuilder, Url};
 use serde::Deserialize;
 
 use super::N_SPREADSHEET_RANGES;
@@ -117,9 +116,9 @@ mod tests {
 
     use pretty_assertions::{assert_eq, assert_str_eq};
     use serde::Deserialize;
-    use toml::toml;
+    
 
-    use super::{SpreadsheetColumnRange, SpreadsheetSpecification};
+    use super::SpreadsheetColumnRange;
 
     #[test]
     fn spreadsheet_range_to_and_from_str() {

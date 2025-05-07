@@ -1,7 +1,7 @@
 use std::fs;
 
 use camino::{Utf8Path, Utf8PathBuf};
-use serde::{Deserialize, de::DeserializeOwned};
+use serde::Deserialize;
 
 mod samplesheet;
 mod xenium;

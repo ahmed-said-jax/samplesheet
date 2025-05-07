@@ -6,7 +6,7 @@ use serde::{Deserialize, Deserializer};
 
 use super::{
     N_SPREADSHEET_RANGES,
-    slide::{self, Slide},
+    slide::{Slide},
 };
 
 #[derive(Deserialize, Debug)]

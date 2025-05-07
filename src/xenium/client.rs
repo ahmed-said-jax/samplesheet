@@ -6,7 +6,6 @@ use reqwest::{
     Client, ClientBuilder, Url,
     header::{HeaderMap, HeaderValue},
 };
-use serde::de::DeserializeOwned;
 
 use super::{config::SpreadsheetSpecification, spreadsheet::Spreadsheet};
 
