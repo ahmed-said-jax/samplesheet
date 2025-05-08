@@ -1,7 +1,12 @@
+use std::collections::HashMap;
+
+use anyhow::anyhow;
+use camino::{Utf8Path, Utf8PathBuf};
+
 #[derive(bon::Builder, Debug)]
 pub(super) struct Slide<'a> {
-    lab_name: &'a str,
-    run_id: &'a str,
-    id: &'a str,
-    name: &'a str,
+    pub(super) id: &'a str,
+    pub(super) name: &'a str,
+    pub(super) run_id: &'a str,
+    pub(super) lab_name: &'a str,
 }

@@ -16,12 +16,10 @@ target/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
-# The test data for this package is real data, which has emails and people's personal information
-test-data
-
 # Environment
 .env
 
 # Configuration
 config*toml
+config*toml*gpg
 !config.sample.toml

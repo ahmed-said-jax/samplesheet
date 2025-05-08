@@ -7,7 +7,10 @@ use reqwest::{
     header::{HeaderMap, HeaderValue},
 };
 
-use super::{config::SpreadsheetSpecification, spreadsheet::Spreadsheet};
+use super::{
+    config::SpreadsheetSpecification,
+    spreadsheet::{self, MajorDimension},
+};
 
 #[derive(Clone)]
 pub(super) struct GoogleSheetsClient(Client);
@@ -27,39 +30,23 @@ impl GoogleSheetsClient {
         Ok(Self(client))
     }
 
-    pub async fn download_spreadsheet(&self, spec: &SpreadsheetSpecification) -> anyhow::Result<Spreadsheet> {
+    pub async fn download_spreadsheet(
+        &self,
+        spec: &SpreadsheetSpecification,
+    ) -> anyhow::Result<spreadsheet::ValueRange> {
         let Self(client) = self;
 
-        spec.validate_n_rows()?;
-
-        let base = "https://sheets.googleapis.com/v4/spreadsheets";
-        let endpoint = "values:batchGet";
-
-        let SpreadsheetSpecification {
-            id: requested_spreadsheet_id,
-            ..
-        } = spec;
-
-        let url = Url::from_str(&format!("{base}/{requested_spreadsheet_id}/{endpoint}"))?;
-        let ranges = spec.to_a1_ranges().map(|r| ("ranges", r));
-
-        let request = client.get(url).query(&ranges).query(&[("majorDimension", "columns")]);
+        let url = spec
+            .to_url()
+            .context("failed to construct URL from spreadsheet specification")?;
+        let request = client
+            .get(url)
+            .query(&[("majorDimension", &MajorDimension::Rows.to_string())]);
 
         let raw_data = request.send().await?.text().await?;
 
         let data =
             serde_json::from_str(&raw_data).context(format!("failed to deserialize spreadsheet:\n{raw_data}"))?;
-
-        let Spreadsheet {
-            spreadsheet_id: returned_spreadsheet_id,
-            ..
-        } = &data;
-
-        ensure!(
-            returned_spreadsheet_id == requested_spreadsheet_id,
-            "the Google Sheets API returned a different spreadsheet from the one requested\n:requested: \
-             {requested_spreadsheet_id}\nreturned: {returned_spreadsheet_id}"
-        );
 
         Ok(data)
     }

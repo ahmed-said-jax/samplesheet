@@ -5,7 +5,7 @@ use camino::Utf8PathBuf;
 use clap::{Parser, Subcommand};
 use scbl_utils::{AppConfig, stage_xenium_data};
 
-#[tokio::main(flavor = "current_thread")]
+#[tokio::main]
 async fn main() -> anyhow::Result<()> {
     dotenvy::dotenv().ok();
     let Cli {
@@ -44,9 +44,9 @@ enum Command {
 
 #[derive(Parser)]
 struct Cli {
-    #[arg(long, env, default_value_t = Utf8PathBuf::from_str("/sc/service/.config/scbl-utils/config.toml").unwrap())]
+    #[arg(long, env = "SCBL_UTILS_CONFIG_PATH", default_value_t = Utf8PathBuf::from_str("/sc/service/.scbl-utils/config.toml").unwrap())]
     config_path: Utf8PathBuf,
-    #[arg(long, env, default_value_t = Utf8PathBuf::from_str("/sc/service/.cache/scbl-utils/").unwrap())]
+    #[arg(long, env = "SCBL_UTILS_CACHE_DIR", default_value_t = Utf8PathBuf::from_str("/sc/service/.scbl-utils/cache/").unwrap())]
     cache_dir: Utf8PathBuf,
     #[command(subcommand)]
     command: Command,
