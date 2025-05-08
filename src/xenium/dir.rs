@@ -46,7 +46,9 @@ impl<'a> ParsedDataDir<'a> {
             .last()
             .ok_or(anyhow!("failed to get run ID in top-level Xenium data directory"))?;
 
-        let raw_subdirs = dir.read_dir_utf8().context("failed to get dir contents")?;
+        let raw_subdirs = dir
+            .read_dir_utf8()
+            .context(format!("failed to read sub-directories of {dir}"))?;
         const MAX_SUBDIRS: usize = 8;
         let mut subdirs = Vec::with_capacity(MAX_SUBDIRS);
         for subdir in raw_subdirs {
@@ -152,9 +154,9 @@ pub(super) async fn rename(old_path: &Utf8Path, new_path: &Utf8Path) -> anyhow::
 
     tokio::fs::create_dir_all(new_path.join("design"))
         .await
-        .context("failing here")?;
+        .context("failed to create directory {new_path}")?;
 
     Ok(tokio::fs::rename(old_path, new_path.join("xeniumranger"))
         .await
-        .context("or failing here")?)
+        .context("failed to move data directory from {old_path} {new_path}")?)
 }

@@ -24,7 +24,7 @@ pub async fn stage_data(data_dirs: &[Utf8PathBuf], config: &config::Config) -> a
         .iter()
         .map(ParsedDataDir::from_dir)
         .try_collect()
-        .context("failing way up here")?;
+        .context("failed to parse Xenium data directory")?;
 
     let client = GoogleSheetsClient::new(google_sheets_api_key).context("failed to create Google Sheets client")?;
 
@@ -41,7 +41,7 @@ pub async fn stage_data(data_dirs: &[Utf8PathBuf], config: &config::Config) -> a
         .iter()
         .map(|d| {
             d.construct_new_subdir_names(&xenium_slides, staging_dir_spec)
-                .context("failing here")
+                .context("failed to construct new data directory names")
         })
         .try_collect()?;
 
