@@ -1,7 +1,7 @@
-[samplesheet]
-
 [xenium]
+spreadsheet_spec = { id = "", range = "'Bioinformatics2'!A2:D1000", slide_id_col_idx = 0, slide_name_col_idx = 1, run_id_col_idx = 2, lab_name_col_idx = 3 }
 google_sheets_api_key = ""
 
-[xenium.spreadsheet_spec]
-id = ""
+[xenium.staging_dir_spec]
+root = "test-data/staging"
+lab_dirs = { "Elise Courtois Lab" = "elise_courtois" }
