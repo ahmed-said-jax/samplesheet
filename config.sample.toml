@@ -1,3 +1,8 @@
+[samplesheet]
+species_reference_path = {}
+chemistry_program = {}
+species_probe_set = {}
+
 [xenium]
 spreadsheet_spec = { id = "", range = "'Bioinformatics2'!A2:D1000", slide_id_col_idx = 0, slide_name_col_idx = 1, run_id_col_idx = 2, lab_name_col_idx = 3 }
 google_sheets_api_key = ""
