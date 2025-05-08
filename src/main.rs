@@ -3,7 +3,7 @@ use std::str::FromStr;
 use anyhow::Context;
 use camino::Utf8PathBuf;
 use clap::{Parser, Subcommand};
-use scbl_utils::{AppConfig, stage_xenium_data};
+use scbl_utils::{AppConfig, stage_xenium_data, write_samplesheet};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -21,8 +21,9 @@ async fn main() -> anyhow::Result<()> {
         Command::Samplesheet {
             fastq_paths,
             output_path,
-        } => todo!(),
-        Command::StageXenium { data_dirs } => stage_xenium_data(&data_dirs, &xenium)
+            tracking_sheet_dir,
+        } => write_samplesheet(&samplesheet, &fastq_paths, &tracking_sheet_dir, &output_path)?,
+        Command::StageXenium { data_dirs } => stage_xenium_data(&xenium, &data_dirs)
             .await
             .context("failed to stage xenium data directories")?,
     }
@@ -34,6 +35,8 @@ async fn main() -> anyhow::Result<()> {
 enum Command {
     Samplesheet {
         fastq_paths: Vec<Utf8PathBuf>,
+        #[arg(short, long, default_value_t = Utf8PathBuf::from_str("tracking-sheet").unwrap())]
+        tracking_sheet_dir: Utf8PathBuf,
         #[arg(short, long, default_value_t = Utf8PathBuf::from_str("samplesheet.yaml").unwrap())]
         output_path: Utf8PathBuf,
     },

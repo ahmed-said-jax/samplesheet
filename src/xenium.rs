@@ -13,7 +13,7 @@ use itertools::Itertools;
 
 const N_FIELDS: usize = 4;
 
-pub async fn stage_data(data_dirs: &[Utf8PathBuf], config: &config::Config) -> anyhow::Result<()> {
+pub async fn stage_data(config: &config::Config, data_dirs: &[Utf8PathBuf]) -> anyhow::Result<()> {
     let Config {
         google_sheets_api_key,
         spreadsheet_spec,

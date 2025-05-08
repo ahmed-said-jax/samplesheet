@@ -9,7 +9,7 @@ mod xenium;
 #[derive(Deserialize)]
 pub struct AppConfig {
     // placeholder
-    pub samplesheet: Option<String>,
+    pub samplesheet: samplesheet::config::Config,
     pub xenium: xenium::config::Config,
 }
 
@@ -19,6 +19,15 @@ impl AppConfig {
     }
 }
 
-pub async fn stage_xenium_data(data_dirs: &[Utf8PathBuf], config: &xenium::config::Config) -> anyhow::Result<()> {
-    xenium::stage_data(data_dirs, config).await
+pub async fn stage_xenium_data(config: &xenium::config::Config, data_dirs: &[Utf8PathBuf]) -> anyhow::Result<()> {
+    xenium::stage_data(config, data_dirs).await
+}
+
+pub fn write_samplesheet(
+    config: &samplesheet::config::Config,
+    fastq_paths: &[Utf8PathBuf],
+    tracking_sheet_dir: &Utf8Path,
+    output_path: &Utf8Path,
+) -> anyhow::Result<()> {
+    samplesheet::write(config, fastq_paths, tracking_sheet_dir, output_path)
 }
