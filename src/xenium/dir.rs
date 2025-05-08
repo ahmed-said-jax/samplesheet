@@ -1,6 +1,7 @@
 use std::{
     collections::{HashMap, HashSet},
     io,
+    process::Output,
     str::FromStr,
 };
 
@@ -55,9 +56,14 @@ impl<'a> ParsedDataDir<'a> {
             let subdir = subdir?;
 
             let path = subdir.into_path();
-            let slide_name = path
-                .file_name()
-                .ok_or(anyhow!("failed to get filename for {path}"))?
+
+            let path_name = path.file_name().ok_or(anyhow!("failed to get filename for {path}"))?;
+
+            if path_name == ".gitkeep" {
+                continue;
+            }
+
+            let slide_name = path_name
                 .split("__")
                 .nth(1)
                 .ok_or(anyhow!("failed to get slide name for {path}"))?
@@ -89,7 +95,7 @@ impl<'a> ParsedDataDir<'a> {
 
         ensure!(
             matching_slides.len() == subdirs.len(),
-            "spreadsheet indicates {} slides for this run, but the data directory {path} has {} subdirectories (each corresponding to a slide",
+            "spreadsheet indicates {} slides for this run, but the data directory {path} has {} subdirectories (each corresponding to a slide)",
             matching_slides.len(),
             subdirs.len()
         );
@@ -142,7 +148,7 @@ pub(super) async fn rename(old_path: &Utf8Path, new_path: &Utf8Path) -> anyhow::
         println!("skipping renaming {old_path} to {new_path}, as it already exists");
     }
 
-    println!("{old_path} ->\n{new_path}");
+    println!("{old_path} -> {new_path}/xeniumranger");
 
     let mut input = String::new();
     io::stdin().read_line(&mut input)?;
@@ -156,7 +162,21 @@ pub(super) async fn rename(old_path: &Utf8Path, new_path: &Utf8Path) -> anyhow::
         .await
         .context("failed to create directory {new_path}")?;
 
-    Ok(tokio::fs::rename(old_path, new_path.join("xeniumranger"))
+    let new_path = new_path.join("xeniumranger");
+
+    let mut mv_cmd = tokio::process::Command::new("mv");
+    mv_cmd.arg(&old_path).arg(&new_path);
+
+    let output = mv_cmd
+        .output()
         .await
-        .context("failed to move data directory from {old_path} {new_path}")?)
+        .context(format!("failed to move {old_path} to {new_path}"))?;
+
+    ensure!(
+        output.status.success(),
+        "failed to move {old_path} to {new_path}:\n{}",
+        String::from_utf8(output.stderr).unwrap()
+    );
+
+    Ok(())
 }
