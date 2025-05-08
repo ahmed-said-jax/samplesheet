@@ -47,9 +47,9 @@ enum Command {
 
 #[derive(Parser)]
 struct Cli {
-    #[arg(long, env = "SCBL_UTILS_CONFIG_PATH", default_value_t = Utf8PathBuf::from_str("/sc/service/.scbl-utils/config.toml").unwrap())]
+    #[arg(long, env = "SCBL_UTILS_CONFIG_PATH", default_value_t = Utf8PathBuf::from_str("/sc/service/etc/.scbl-utils/config.toml").unwrap())]
     config_path: Utf8PathBuf,
-    #[arg(long, env = "SCBL_UTILS_CACHE_DIR", default_value_t = Utf8PathBuf::from_str("/sc/service/.scbl-utils/cache/").unwrap())]
+    #[arg(long, env = "SCBL_UTILS_CACHE_DIR", default_value_t = Utf8PathBuf::from_str("/sc/service/etc/.scbl-utils/cache/").unwrap())]
     cache_dir: Utf8PathBuf,
     #[command(subcommand)]
     command: Command,
