@@ -1,12 +1,13 @@
 use std::{
     collections::{HashMap, HashSet},
-    io,
+    io::{self, Read},
     process::Output,
     str::FromStr,
 };
 
 use anyhow::{Context, anyhow, ensure};
 use camino::{Utf8Path, Utf8PathBuf};
+use console::Term;
 
 use super::{config::StagingDirSpecification, slide::Slide};
 
@@ -139,7 +140,8 @@ impl<'a> ParsedDataDir<'a> {
     }
 }
 
-pub(super) async fn rename(old_path: &Utf8Path, new_path: &Utf8Path) -> anyhow::Result<()> {
+// This function should be split into lots of nice little functions
+pub(super) async fn rename(term: Term, old_path: &Utf8Path, new_path: &Utf8Path) -> anyhow::Result<()> {
     let old_path = old_path
         .canonicalize_utf8()
         .context(format!("failed to get absolute path for {old_path}"))?;
@@ -148,14 +150,17 @@ pub(super) async fn rename(old_path: &Utf8Path, new_path: &Utf8Path) -> anyhow::
         println!("skipping renaming {old_path} to {new_path}, as it already exists");
     }
 
-    println!("{old_path} -> {new_path}/xeniumranger");
+    print!("{old_path} -> {new_path}/xeniumranger (y/n): ");
 
-    let mut input = String::new();
-    io::stdin().read_line(&mut input)?;
-    println!("\n");
-
-    if input != "y\n" {
-        return Ok(());
+    loop {
+        let input = term.read_char().context("failed to read char from terminal")?;
+        if input == 'y' {
+            break;
+        } else if input == 'n' {
+            return Ok(());
+        } else {
+            println!("input must be either 'y' or 'n'");
+        }
     }
 
     tokio::fs::create_dir_all(new_path.join("design"))

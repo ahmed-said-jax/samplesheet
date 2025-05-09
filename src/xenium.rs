@@ -8,6 +8,7 @@ use anyhow::Context;
 use camino::Utf8PathBuf;
 use client::GoogleSheetsClient;
 use config::{Config, SpreadsheetSpecification};
+use console::Term;
 use dir::ParsedDataDir;
 use itertools::Itertools;
 
@@ -45,13 +46,11 @@ pub async fn stage_data(config: &config::Config, data_dirs: &[Utf8PathBuf]) -> a
         })
         .try_collect()?;
 
-    println!(
-        "For each Xenium data directory, the path renaming will be displayed. Press 'y' to confirm the move. Otherwise, press any other key."
-    );
     let mut move_futures = Vec::new();
+    let term = Term::stdout();
     for renaming in &renamings {
         for (old_path, new_path) in renaming {
-            move_futures.push(dir::rename(old_path, new_path));
+            move_futures.push(dir::rename(term.clone(), old_path, new_path));
         }
     }
 

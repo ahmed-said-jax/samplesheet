@@ -1,8 +1,12 @@
-use std::str::FromStr;
+use std::{
+    io::{self, Read},
+    str::FromStr,
+};
 
-use anyhow::Context;
+use anyhow::{Context, bail};
 use camino::Utf8PathBuf;
 use clap::{Parser, Subcommand};
+use console::Term;
 use scbl_utils::{AppConfig, stage_xenium_data, write_samplesheet};
 
 #[tokio::main]
