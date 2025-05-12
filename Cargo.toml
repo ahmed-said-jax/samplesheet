@@ -2,7 +2,7 @@
 name = "scbl-utils"
 version = "0.1.6"
 edition = "2024"
-license = "MIT OR Apache 2.0"
+license = "MIT OR Apache-2.0"
 description = "A command-line utility for data processing and delivery at the Single Cell Biology Lab at the Jackson Laboratory"
 repository = "https://github.com/ahmed-said-jax/scbl-utils"
 readme = "README.md"
