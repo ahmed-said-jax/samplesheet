@@ -22,13 +22,7 @@ scbl-utils --cache-dir /path/to/cache <COMMAND>
 ### Generate an [`nf-tenx`](https://github.com/thejacksonlaboratory/nf-tenx) Samplesheet
 1. Download the 5 spreadsheets that make up the Chromium workbook as CSV files.
 2. Put them in one directory. By default, `scbl-utils` will look for the CSV files at `/sc/service/.cache/scbl-utils/chromium-tracking-sheet`, but you can [override this behavior](#cache). However, note that overriding this behavior may lead to errors, as other users may find outdated tracking sheets at `/sc/service/.cache/scbl-utils/chromium-tracking-sheet`, or they may end up duplicating your work without knowledge of where you put the tracking sheet.
-3. Name each file with the name of its Excel sheet. Currently, these are:
-    - `Suspensions.csv`
-    - `Multiplexed Suspensions.csv`
-    - `GEMs.csv`
-    - `GEMs-Suspensions.csv`
-    - `Libraries.csv`
-4. Run the script, passing in a list of `fastq` **files**. **Do not** pass in a list of directories - this will throw an error (by design). For most use cases, you can use globs on GT delivery directories:
+3. Run the script, passing in a list of `fastq` **files**. **Do not** pass in a list of directories - this will throw an error (by design). For most use cases, you can use globs on GT delivery directories:
 ```bash
 scbl-utils samplesheet /gt/gt-delivery/SingleCellBiologyGroup_CT/<A FASTQ DIRECTORY>/* /gt/gt-delivery/SingleCellBiologyGroup_CT/<ANOTHER FASTQ DIRECTORY>/*
 ```
