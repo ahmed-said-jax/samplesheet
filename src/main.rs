@@ -1,12 +1,8 @@
-use std::{
-    io::{self, Read},
-    str::FromStr,
-};
+use std::str::FromStr;
 
-use anyhow::{Context, bail};
+use anyhow::Context;
 use camino::Utf8PathBuf;
 use clap::{Parser, Subcommand};
-use console::Term;
 use scbl_utils::{AppConfig, stage_xenium_data, write_samplesheet};
 
 #[tokio::main]
@@ -39,9 +35,12 @@ async fn main() -> anyhow::Result<()> {
 enum Command {
     /// Generate a new samplesheet for use with the nf-tenx pipeline
     Samplesheet {
-        /// The fastq files from which to generate a samplesheet. Note that this expects fastq *files*, not directories. If you want to pass an entire directory's worth of files, just use globs like `/path/to/fastq-dir/*`
+        /// The fastq files from which to generate a samplesheet. Note that this expects fastq *files*, not
+        /// directories. If you want to pass an entire directory's worth of files, just use globs like
+        /// `/path/to/fastq-dir/*`
         fastq_paths: Vec<Utf8PathBuf>,
-        /// The directory in which the tracking sheet is downloaded. Soon to be deprecated in favor of automatic fetching from Microsoft OneDrive/SharePoint
+        /// The directory in which the tracking sheet is downloaded. Soon to be deprecated in favor of automatic
+        /// fetching from Microsoft OneDrive/SharePoint
         #[arg(short, long, default_value_t = Utf8PathBuf::from_str("tracking-sheet").unwrap())]
         tracking_sheet_dir: Utf8PathBuf,
         /// The path at which to write the resulting samplesheet
@@ -58,7 +57,8 @@ enum Command {
     },
 }
 
-/// A command-line utility to aid in data-processing and delivery at the Single Cell Biology Laboratory at the Jackson Laboratory
+/// A command-line utility to aid in data-processing and delivery at the Single Cell Biology Laboratory at the Jackson
+/// Laboratory
 #[derive(Parser)]
 #[command(version, about)]
 struct Cli {

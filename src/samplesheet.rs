@@ -1,6 +1,6 @@
 use std::{collections::HashMap, fs};
 
-use anyhow::{Context, anyhow};
+use anyhow::{Context, anyhow, ensure};
 use camino::{Utf8Path, Utf8PathBuf};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
@@ -138,6 +138,9 @@ fn library_id_to_fastq_dir(fastq_paths: &[Utf8PathBuf]) -> anyhow::Result<HashMa
     let mut library_ids_to_fastqs = HashMap::new();
     for p in fastq_paths {
         let err = format!("malformed FASTQ path: {p}");
+
+        ensure!(p.is_dir(), "fastq paths must point to files, but {p} is a directory");
+        ensure!(!p.is_file(), "fastq paths must point to files, but {p} does not");
 
         let filename = p
             .file_name()

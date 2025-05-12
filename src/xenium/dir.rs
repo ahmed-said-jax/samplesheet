@@ -1,9 +1,4 @@
-use std::{
-    collections::{HashMap, HashSet},
-    io::{self, Read},
-    process::Output,
-    str::FromStr,
-};
+use std::collections::{HashMap, HashSet};
 
 use anyhow::{Context, anyhow, ensure};
 use camino::{Utf8Path, Utf8PathBuf};
@@ -96,7 +91,8 @@ impl<'a> ParsedDataDir<'a> {
 
         ensure!(
             matching_slides.len() == subdirs.len(),
-            "spreadsheet indicates {} slides for this run, but the data directory {path} has {} subdirectories (each corresponding to a slide)",
+            "spreadsheet indicates {} slides for this run, but the data directory {path} has {} subdirectories (each \
+             corresponding to a slide)",
             matching_slides.len(),
             subdirs.len()
         );
