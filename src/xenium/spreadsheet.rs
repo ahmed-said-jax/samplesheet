@@ -5,6 +5,7 @@ use serde::{Deserialize, Deserializer};
 
 use super::{N_FIELDS, SpreadsheetSpecification, slide::Slide};
 
+#[allow(dead_code)]
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub(super) struct ValueRange {

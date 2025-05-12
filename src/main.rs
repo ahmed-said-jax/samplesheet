@@ -10,7 +10,7 @@ async fn main() -> anyhow::Result<()> {
     dotenvy::dotenv().ok();
     let Cli {
         config_path,
-        cache_dir,
+        cache_dir: _,
         command,
     } = Cli::parse();
 

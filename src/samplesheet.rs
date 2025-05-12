@@ -3,7 +3,7 @@ use std::{collections::HashMap, fs};
 use anyhow::{Context, anyhow, ensure};
 use camino::{Utf8Path, Utf8PathBuf};
 use itertools::Itertools;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use tracking_sheet::{FromTrackingSheetDir, Gems, GemsSuspensions, Id, Library, MultiplexedSuspension, Suspension};
 pub(super) mod config;
 mod tracking_sheet;
@@ -306,18 +306,4 @@ pub struct Samplesheet<'a> {
 struct SampleDesign<'a> {
     name: &'a str,
     description: &'a str,
-}
-
-#[derive(Deserialize)]
-struct Config {
-    species_reference_path: HashMap<String, HashMap<String, Utf8PathBuf>>,
-    chemistry_program: HashMap<String, (String, String, String)>,
-    species_probe_set: HashMap<String, Utf8PathBuf>,
-}
-
-impl Config {
-    fn from_path(path: &Utf8Path) -> anyhow::Result<Self> {
-        let contents = fs::read_to_string(&path)?;
-        Ok(toml::from_str(&contents)?)
-    }
 }
