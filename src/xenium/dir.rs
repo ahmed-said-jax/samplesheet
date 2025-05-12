@@ -28,7 +28,7 @@ pub(super) struct ParsedDataDir<'a> {
 #[derive(Debug)]
 struct SubDir {
     path: Utf8PathBuf,
-    slide_name: String, // This is so stupid
+    slide_id: String, // This is so stupid
 }
 
 impl<'a> ParsedDataDir<'a> {
@@ -55,17 +55,13 @@ impl<'a> ParsedDataDir<'a> {
 
             let path_name = path.file_name().ok_or(anyhow!("failed to get filename for {path}"))?;
 
-            if path_name == ".gitkeep" {
-                continue;
-            }
-
-            let slide_name = path_name
+            let slide_id = path_name
                 .split("__")
                 .nth(1)
                 .ok_or(anyhow!("failed to get slide name for {path}"))?
                 .to_string();
 
-            subdirs.push(SubDir { path, slide_name });
+            subdirs.push(SubDir { path, slide_id });
         }
 
         Ok(Self {
@@ -98,10 +94,10 @@ impl<'a> ParsedDataDir<'a> {
         );
 
         let mut subdirs_paired_with_slides = Vec::new();
-        let mut seen_spreadsheet_slide_names = HashSet::new();
+        let mut seen_spreadsheet_slide_ids = HashSet::new();
         for SubDir {
             path,
-            slide_name: subdir_slide_name,
+            slide_id: subdir_slide_id,
         } in subdirs
         {
             for Slide {
@@ -111,14 +107,14 @@ impl<'a> ParsedDataDir<'a> {
                 lab_name,
             } in matching_slides
             {
-                if subdir_slide_name != spreadsheet_slide_name {
+                if subdir_slide_id != spreadsheet_slide_id {
                     continue;
                 }
 
-                let is_unseen = seen_spreadsheet_slide_names.insert(*spreadsheet_slide_name);
+                let is_unseen = seen_spreadsheet_slide_ids.insert(*spreadsheet_slide_id);
                 ensure!(
                     is_unseen,
-                    "found multiple slides with the name {spreadsheet_slide_name} in the spreadsheet"
+                    "found multiple slides with the ID {spreadsheet_slide_id} in the spreadsheet"
                 );
 
                 let new_path_name = format!("{spreadsheet_slide_id}-{run_id}_{spreadsheet_slide_name}");
