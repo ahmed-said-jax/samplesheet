@@ -8,7 +8,6 @@ mod xenium;
 
 #[derive(Deserialize)]
 pub struct AppConfig {
-    // placeholder
     pub samplesheet: samplesheet::config::Config,
     pub xenium: xenium::config::Config,
 }
@@ -19,8 +18,12 @@ impl AppConfig {
     }
 }
 
-pub async fn stage_xenium_data(config: &xenium::config::Config, data_dirs: &[Utf8PathBuf]) -> anyhow::Result<()> {
-    xenium::stage_data(config, data_dirs).await
+pub async fn stage_xenium_data(
+    config: &xenium::config::Config,
+    data_dirs: &[Utf8PathBuf],
+    skip_confirm: bool,
+) -> anyhow::Result<()> {
+    xenium::stage_data(config, data_dirs, skip_confirm).await
 }
 
 pub fn write_samplesheet(
