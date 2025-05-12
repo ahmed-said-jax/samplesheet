@@ -139,8 +139,8 @@ fn library_id_to_fastq_dir(fastq_paths: &[Utf8PathBuf]) -> anyhow::Result<HashMa
     for p in fastq_paths {
         let err = format!("malformed FASTQ path: {p}");
 
-        ensure!(p.is_dir(), "fastq paths must point to files, but {p} is a directory");
-        ensure!(!p.is_file(), "fastq paths must point to files, but {p} does not");
+        ensure!(!p.is_dir(), "fastq paths must point to files, but {p} is a directory");
+        ensure!(p.is_file(), "fastq paths must point to files, but {p} does not");
 
         let filename = p
             .file_name()
