@@ -8,12 +8,13 @@ use anyhow::Context;
 use camino::Utf8PathBuf;
 use client::GoogleSheetsClient;
 use config::{Config, SpreadsheetSpecification};
-use dir::ParsedDataDir;
+use console::Term;
+use dir::{ParsedDataDir, confirm_move};
 use itertools::Itertools;
 
 const N_FIELDS: usize = 4;
 
-pub async fn stage_data(config: &config::Config, data_dirs: &[Utf8PathBuf]) -> anyhow::Result<()> {
+pub async fn stage_data(config: &config::Config, data_dirs: &[Utf8PathBuf], skip_confirm: bool) -> anyhow::Result<()> {
     let Config {
         google_sheets_api_key,
         spreadsheet_spec,
@@ -45,13 +46,18 @@ pub async fn stage_data(config: &config::Config, data_dirs: &[Utf8PathBuf]) -> a
         })
         .try_collect()?;
 
-    println!(
-        "For each Xenium data directory, the path renaming will be displayed. Press 'y' to confirm the move. Otherwise, press any other key."
-    );
     let mut move_futures = Vec::new();
+    let term = Term::stdout();
     for renaming in &renamings {
         for (old_path, new_path) in renaming {
-            move_futures.push(dir::rename(old_path, new_path));
+            let mut push_future = || move_futures.push(dir::rename(old_path, new_path));
+
+            if skip_confirm {
+                push_future();
+            } else if confirm_move(&term, old_path, new_path)? {
+                push_future();
+                term.write_line("")?;
+            }
         }
     }
 

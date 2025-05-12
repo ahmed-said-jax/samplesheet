@@ -1,11 +1,11 @@
-use std::{collections::HashMap, fmt::Display, mem};
+use std::{collections::HashMap, fmt::Display};
 
-use anyhow::{Context, bail, ensure};
 use itertools::Itertools;
 use serde::{Deserialize, Deserializer};
 
 use super::{N_FIELDS, SpreadsheetSpecification, slide::Slide};
 
+#[allow(dead_code)]
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub(super) struct ValueRange {

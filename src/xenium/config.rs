@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fmt::Display, str::FromStr};
+use std::{collections::HashMap, str::FromStr};
 
 use anyhow::anyhow;
 use camino::Utf8PathBuf;

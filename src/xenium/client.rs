@@ -1,9 +1,6 @@
-use std::str::FromStr;
-
-use anyhow::{Context, ensure};
-use itertools::Itertools;
+use anyhow::Context;
 use reqwest::{
-    Client, ClientBuilder, Url,
+    Client, ClientBuilder,
     header::{HeaderMap, HeaderValue},
 };
 

@@ -1,12 +1,8 @@
-use std::{
-    collections::{HashMap, HashSet},
-    io,
-    process::Output,
-    str::FromStr,
-};
+use std::collections::{HashMap, HashSet};
 
 use anyhow::{Context, anyhow, ensure};
 use camino::{Utf8Path, Utf8PathBuf};
+use console::Term;
 
 use super::{config::StagingDirSpecification, slide::Slide};
 
@@ -95,7 +91,8 @@ impl<'a> ParsedDataDir<'a> {
 
         ensure!(
             matching_slides.len() == subdirs.len(),
-            "spreadsheet indicates {} slides for this run, but the data directory {path} has {} subdirectories (each corresponding to a slide)",
+            "spreadsheet indicates {} slides for this run, but the data directory {path} has {} subdirectories (each \
+             corresponding to a slide)",
             matching_slides.len(),
             subdirs.len()
         );
@@ -114,29 +111,56 @@ impl<'a> ParsedDataDir<'a> {
                 lab_name,
             } in matching_slides
             {
-                if subdir_slide_name == spreadsheet_slide_name {
-                    let is_unseen = seen_spreadsheet_slide_names.insert(*spreadsheet_slide_name);
-                    ensure!(
-                        is_unseen,
-                        "found multiple slides with the name {spreadsheet_slide_name} in the spreadsheet"
-                    );
-
-                    let new_path_name = format!("{spreadsheet_slide_id}-{run_id}_{spreadsheet_slide_name}");
-
-                    let lab_staging_dir = staging_dir_spec.lab_staging_dir(*lab_name)?;
-                    let lab_staging_dir = lab_staging_dir
-                        .canonicalize_utf8()
-                        .context(format!("failed to get absolute path for {lab_staging_dir}"))?;
-
-                    let new_path = lab_staging_dir.join(new_path_name);
-
-                    subdirs_paired_with_slides.push((path.as_path(), new_path));
+                if subdir_slide_name != spreadsheet_slide_name {
+                    continue;
                 }
+
+                let is_unseen = seen_spreadsheet_slide_names.insert(*spreadsheet_slide_name);
+                ensure!(
+                    is_unseen,
+                    "found multiple slides with the name {spreadsheet_slide_name} in the spreadsheet"
+                );
+
+                let new_path_name = format!("{spreadsheet_slide_id}-{run_id}_{spreadsheet_slide_name}");
+
+                let lab_staging_dir = staging_dir_spec.lab_staging_dir(*lab_name)?;
+                let lab_staging_dir = lab_staging_dir
+                    .canonicalize_utf8()
+                    .context(format!("failed to get absolute path for {lab_staging_dir}"))?;
+
+                let new_path = lab_staging_dir.join(new_path_name).join("xeniumranger");
+
+                subdirs_paired_with_slides.push((path.as_path(), new_path));
             }
         }
 
         Ok(subdirs_paired_with_slides)
     }
+}
+
+pub(super) fn confirm_move(term: &Term, old_path: &Utf8Path, new_path: &Utf8Path) -> anyhow::Result<bool> {
+    let err = "failed to write line to terminal";
+    if new_path.exists() {
+        term.write_line(&format!(
+            "skipping renaming {old_path} to {new_path}, as it already exists"
+        ))
+        .context(err)?;
+    }
+
+    term.write_line(&format!("move {old_path} -> {new_path} (y/n)?"))
+        .context(err)?;
+    let res = loop {
+        let input = term.read_char().context("failed to read char from terminal")?;
+        if input == 'y' {
+            break true;
+        } else if input == 'n' {
+            break false;
+        } else {
+            term.write_line("input must be either 'y' or 'n'").context(err)?;
+        }
+    };
+
+    Ok(res)
 }
 
 pub(super) async fn rename(old_path: &Utf8Path, new_path: &Utf8Path) -> anyhow::Result<()> {
@@ -148,21 +172,9 @@ pub(super) async fn rename(old_path: &Utf8Path, new_path: &Utf8Path) -> anyhow::
         println!("skipping renaming {old_path} to {new_path}, as it already exists");
     }
 
-    println!("{old_path} -> {new_path}/xeniumranger");
-
-    let mut input = String::new();
-    io::stdin().read_line(&mut input)?;
-    println!("\n");
-
-    if input != "y\n" {
-        return Ok(());
-    }
-
     tokio::fs::create_dir_all(new_path.join("design"))
         .await
         .context("failed to create directory {new_path}")?;
-
-    let new_path = new_path.join("xeniumranger");
 
     let mut mv_cmd = tokio::process::Command::new("mv");
     mv_cmd.arg(&old_path).arg(&new_path);
