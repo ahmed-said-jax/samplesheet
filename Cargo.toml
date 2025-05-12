@@ -2,12 +2,14 @@
 name = "scbl-utils"
 version = "0.1.6"
 edition = "2024"
-publish = false
+license = "MIT OR Apache 2.0"
+description = "A command-line utility for data processing and delivery at the Single Cell Biology Lab at the Jackson Laboratory"
+repository = "https://github.com/ahmed-said-jax/scbl-utils"
+readme = "README.md"
 
 [dependencies]
 anyhow = "1.0.98"
 bon = "3.6.3"
-calamine = "0.27.0"
 camino = { version = "1.1.9", features = ["serde1"] }
 clap = { version = "4.5.37", features = ["derive", "env", "wrap_help"] }
 console = "0.15.11"
